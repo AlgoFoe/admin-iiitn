@@ -24,6 +24,11 @@ const facultySchema = new mongoose.Schema({
     departmentCode: {
         type: String,
         required: true,
+    },
+    isHod: {
+        type: Boolean,
+        required: true,
+        default: false
     }
 });
 

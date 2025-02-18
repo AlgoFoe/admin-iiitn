@@ -2,7 +2,7 @@ const Faculty = require("../models/faculty");
 
 const addFaculty = async (req, res) => {
     try {
-        const { name, post, linkedin, imageUrl, department, departmentCode } = req.body;
+        const { name, post, linkedin, imageUrl, department, departmentCode, isHod } = req.body;
 
         const faculty = await Faculty.create({
             name,
@@ -11,6 +11,7 @@ const addFaculty = async (req, res) => {
             linkedin,
             department,
             departmentCode,
+            isHod
         });
 
         if (faculty) {
@@ -60,7 +61,7 @@ const getFaculty = async (req, res) => {
 
 const updateFaculty = async (req, res) => {
     try {
-        const { name, post, linkedin, imageUrl, department, departmentCode, id } = req.body;
+        const { name, post, linkedin, imageUrl, department, departmentCode, id, isHod } = req.body;
 
         if (!id) {
             throw new Error("id of faculty required");
@@ -75,6 +76,7 @@ const updateFaculty = async (req, res) => {
                 linkedin,
                 department,
                 departmentCode,
+                isHod
             },
             {
                 new: true,
@@ -97,20 +99,20 @@ const deleteFaculty = async (req, res) => {
     try {
         const { id } = req.body
 
-        if(!id){
+        if (!id) {
             throw new Error("id required to delete faculty");
         }
 
         const faculty = await Faculty.findByIdAndDelete(id)
 
-        if(faculty) {
-            res.status(200).json({msg:"Faculty deleted successfully",data:faculty})
+        if (faculty) {
+            res.status(200).json({ msg: "Faculty deleted successfully", data: faculty })
         } else {
-            res.status(200).json({msg: `No faculty with id ${id} found`})
+            res.status(200).json({ msg: `No faculty with id ${id} found` })
         }
     } catch (err) {
-        console.log("Error in deleteFaculty controller : ",err.message)
-        res.status(500).json({error: "Internal Server Error"})
+        console.log("Error in deleteFaculty controller : ", err.message)
+        res.status(500).json({ error: "Internal Server Error" })
     }
 }
 
