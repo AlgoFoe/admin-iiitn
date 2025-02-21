@@ -25,6 +25,10 @@ import { ChevronDownIcon } from "@/components/ChevronDownIcon";
 import { Link } from "@heroui/link";
 import { Trash2, UserRoundPen } from "lucide-react";
 import axios from "axios";
+import { useDisclosure } from "@heroui/modal";
+import FacultyModal from "@/components/FacultyModal";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const columns = [
     { name: "S.No.", uid: "sno", sortable: true },
@@ -50,13 +54,20 @@ function capitalize(s) {
 const INITIAL_VISIBLE_COLUMNS = ["name", "department", "post", "actions", "sno", "image", "linkedin"];
 
 const Faculty = () => {
+    const [name, setName] = useState("");
+    const [department, setDepartment] = useState();
+    const [departmentCode, setDepartmentCode] = useState("");
+    const [isHod, setIsHod] = useState();
+    const [linkedin, setLinkedin] = useState("");
+    const [post, setPost] = useState("");
+    const [isEditing, setIsEditing] = useState(false)
+
     const [filterValue, setFilterValue] = useState("");
     const [selectedKeys, setSelectedKeys] = useState(new Set([]));
     const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
     const [departmentFilter, setDepartmentFilter] = useState("all");
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [faculties, setFaculties] = useState([])
-    const [isDeleting, setIsDeleting] = useState(false)
     const [sortDescriptor, setSortDescriptor] = useState(
         {
             column: "sno",
@@ -64,6 +75,12 @@ const Faculty = () => {
         },
     );
     const [page, setPage] = useState(1);
+    // const [isLoading, setIsLoading] = useState(false)
+    // const [loadingIds, setLoadingIds] = useState(new Set());
+
+    const { isOpen, onOpen, onOpenChange } = useDisclosure()
+
+    const navigate = useNavigate()
 
     const hasSearchFilter = Boolean(filterValue);
 
@@ -93,7 +110,7 @@ const Faculty = () => {
                 console.log("Error Fetching : ", err)
                 // setError('Department not found');
             } finally {
-                console.log("Done")
+                // console.log("Done")
                 // setLoading(false);
             }
         };
@@ -144,13 +161,21 @@ const Faculty = () => {
     }, [sortDescriptor, items]);
 
     const deleteEntry = async (id) => {
+        // isLoading = true
+        // setLoadingIds((prev) => new Set([...prev,id]));
+
+        const loadingToastId = toast.loading("Processing...")
+
         try {
-            setIsDeleting(true)
+            // setIsDeleting(true)
             // console.log("Server url : ",import.meta.env.VITE_SERVER_URL)
             // console.log("Dept : ",dept)
             const response = await axios.delete(`${import.meta.env.VITE_SERVER_URL}/faculty`, {
                 data: { id }
             });
+
+            toast.dismiss(loadingToastId)
+            toast.success("Success")
 
             // console.log("Response : ",response)
             // console.log("Response : ",response)
@@ -164,12 +189,23 @@ const Faculty = () => {
             // setFaculties(data);
 
         } catch (err) {
-            console.log("Error Deleting Entry : ", err)
+            // console.log("Error Deleting Entry : ", err)
+
+            toast.dismiss(loadingToastId)
+            toast.error(err.response.data.error)
             // setError('Department not found');
         } finally {
-            console.log("Done")
-            setIsDeleting(false)
+            // setLoadingIds((prev) => {
+            //     const newSet = new Set(prev);
+            //     newSet.delete(id);
+            //     return newSet;
+            // });    
+            // console.log("Done")
+            // isLoading = false
+            // setIsDeleting(false)
             // setLoading(false);
+
+            navigate(0)
         }
     }
 
@@ -243,6 +279,17 @@ const Faculty = () => {
                             size="sm"
                             color="warning"
                             variant="flat"
+                            onPress={() => {
+                                onOpen()
+                                setName(user.name)
+                                setDepartment(user.department)
+                                setDepartmentCode(user.departmentCode)
+                                setLinkedin(user.linkedin)
+                                setIsHod(user.isHod)
+                                setPost(user.post)
+                                setIsEditing(true)
+                                console.log(user)
+                            }}
                         >
                             <UserRoundPen />
                         </Button>
@@ -251,7 +298,8 @@ const Faculty = () => {
                             color="danger"
                             variant="flat"
                             onPress={() => deleteEntry(id)}
-                            isDisabled={isDeleting}
+                            // isDisabled={loadingIds.has(id)}
+
                         >
                             <Trash2 />
                         </Button>
@@ -349,7 +397,14 @@ const Faculty = () => {
                                 ))}
                             </DropdownMenu>
                         </Dropdown>
-                        <Button color="primary" endContent={<PlusIcon />}>
+                        <Button
+                            color="primary"
+                            endContent={<PlusIcon />}
+                            onPress={() => {
+                                onOpen()
+                                setIsEditing(false)
+                            }}
+                        >
                             Add New
                         </Button>
                     </div>
@@ -414,17 +469,18 @@ const Faculty = () => {
             className="w-screen h-screen p-5"
         >
             <Table
+                className="min-h-screen"
                 isHeaderSticky
                 aria-label="Faculty table with pagination and sorting"
                 bottomContent={bottomContent}
-                bottomContentPlacement="outside"
+                bottomContentPlacement="inside"
                 classNames={{
-                    wrapper: "max-h-full",
+                    // wrapper: "max-h-full",
                 }}
                 selectedKeys={selectedKeys}
                 sortDescriptor={sortDescriptor}
                 topContent={topContent}
-                topContentPlacement="outside"
+                topContentPlacement="inside"
                 onSelectionChange={setSelectedKeys}
                 onSortChange={setSortDescriptor}
             >
@@ -447,6 +503,16 @@ const Faculty = () => {
                     )}
                 </TableBody>
             </Table>
+            <FacultyModal
+                isOpen={isOpen}
+                onOpenChange={onOpenChange}
+                defaultName={name}
+                defaultDepartment={department}
+                defaultDepartmentCode={departmentCode}
+                defaultPost={post}
+                defaultIsHod={isHod}
+                defaultLinkedIn={linkedin}
+            />
         </div>
     );
 }
