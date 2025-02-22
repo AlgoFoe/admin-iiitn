@@ -26,17 +26,19 @@ import { Link } from "@heroui/link";
 import { Trash2, UserRoundPen } from "lucide-react";
 import axios from "axios";
 import { useDisclosure } from "@heroui/modal";
-import FacultyModal from "@/components/FacultyModal";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import ProjectModal from "@/components/ProjectModal";
 
 const columns = [
     { name: "S.No.", uid: "sno", sortable: true },
-    { name: "NAME", uid: "name", sortable: true },
+    { name: "FACULTY NAME", uid: "facultyName" },
+    { name: "TITLE", uid: "title", sortable: true },
     { name: "DEPARTMENT", uid: "department", sortable: true },
-    { name: "POST", uid: "post" },
-    { name: "IMAGE", uid: "image" },
-    { name: "LINKEDIN", uid: "linkedin" },
+    { name: "FUNDING", uid: "funding" },
+    { name: "DURATION", uid: "duration", sortable: true },
+    { name: "TYPE", uid: "type", sortable: true },
+    { name: "ORGANISATION", uid: "organisation" },
     { name: "ACTIONS", uid: "actions" },
 ];
 
@@ -46,22 +48,36 @@ const departmentOptions = [
     { name: "Electronics & Communication Engineering", uid: "ece" },
 ];
 
+const departmentName = {
+    "bs": "Basic Sciences",
+    "cse": "Computer Science & Engineering",
+    "ece": "Electronics & Communication Engineering",
+}
+
+const chipColors = {
+    "completed": "success",
+    "ongoing": "warning",
+    "consultancy": "secondary"
+}
+
 
 function capitalize(s) {
     return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "";
 }
 
-const INITIAL_VISIBLE_COLUMNS = ["name", "department", "post", "actions", "sno", "image", "linkedin"];
+const INITIAL_VISIBLE_COLUMNS = ["facultyName", "title", "department", "funding", "actions", "sno", "duration", "type", "organisation"];
 
-const Faculty = () => {
-    const [name, setName] = useState("");
-    const [department, setDepartment] = useState();
-    const [departmentCode, setDepartmentCode] = useState("");
-    const [isHod, setIsHod] = useState();
-    const [linkedin, setLinkedin] = useState("");
-    const [post, setPost] = useState("");
+const Project = () => {
+    const [facultyName, setFacultyName] = useState("");
+    const [department, setDepartment] = useState("");
+    const [title, setTitle] = useState("");
+    const [projectType, setProjectType] = useState("");
+    const [duration, setDuration] = useState("");
+    const [organisation, setOrganisation] = useState("");
+    const [funding, setFunding] = useState("")
     const [isEditing, setIsEditing] = useState(false)
     const [id, setId] = useState()
+
     const [isFetching, setIsFetching] = useState(false)
 
     const [filterValue, setFilterValue] = useState("");
@@ -92,7 +108,8 @@ const Faculty = () => {
             try {
                 // console.log("Server url : ",import.meta.env.VITE_SERVER_URL)
                 // console.log("Dept : ",dept)
-                const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/faculty`);
+                const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/project`);
+                // const response = await axios.get(`http://localhost:4000/project`);
 
                 // console.log("Response : ",response)
                 // console.log("Response : ",response)
@@ -133,12 +150,12 @@ const Faculty = () => {
 
         if (hasSearchFilter) {
             filteredUsers = filteredUsers.filter((user) =>
-                user.name.toLowerCase().includes(filterValue.toLowerCase()),
+                user.facultyName.toLowerCase().includes(filterValue.toLowerCase()),
             );
         }
         if (departmentFilter !== "all" && Array.from(departmentFilter).length !== departmentOptions.length) {
             filteredUsers = filteredUsers.filter((user) =>
-                Array.from(departmentFilter).includes(user.departmentCode),
+                Array.from(departmentFilter).includes(user.department),
             );
         }
 
@@ -175,9 +192,13 @@ const Faculty = () => {
             // setIsDeleting(true)
             // console.log("Server url : ",import.meta.env.VITE_SERVER_URL)
             // console.log("Dept : ",dept)
-            const response = await axios.delete(`${import.meta.env.VITE_SERVER_URL}/faculty`, {
+
+            const response = await axios.delete(`${import.meta.env.VITE_SERVER_URL}/project`, {
                 data: { id }
             });
+            // const response = await axios.delete(`http://localhost:4000/project`, {
+            //     data: { id }
+            // });
 
             toast.dismiss(loadingToastId)
             toast.success("Success")
@@ -214,68 +235,53 @@ const Faculty = () => {
         }
     }
 
-    const renderCell = useCallback((user, columnKey, id) => {
-        const cellValue = user[columnKey];
+    const renderCell = useCallback((project, columnKey, id) => {
+        const cellValue = project[columnKey];
 
         switch (columnKey) {
-            case "name":
-                return (
-                    <User
-                        avatarProps={{ radius: "lg", src: user.avatar }}
-                        // description={user.email}
-                        name={cellValue}
-                    >
-                        {/* {user.email} */}
-                    </User>
-                );
-            case "post":
+            case "facultyName":
                 return (
                     <div className="flex flex-col">
                         <p className="text-bold text-small capitalize">{cellValue}</p>
                     </div>
+                );
+            case "funding":
+                return (
+                    <>
+                        <span className="mr-0.5">₹</span>{cellValue}
+                    </>
                 );
             case "department":
                 return (
                     <div className="flex flex-col">
+                        <p className="text-bold text-small capitalize">{departmentName[cellValue]}</p>
+                    </div>
+                );
+            case "organisation":
+                return (
+                    <div className="flex flex-col">
                         <p className="text-bold text-small capitalize">{cellValue}</p>
                     </div>
                 );
-            case "image":
+            case "title":
                 return (
-                    <Link
-                        href={cellValue}
-                        isExternal
-                    >
-                        <Chip
-                            className="light capitalize"
-                            size="sm"
-                            variant="solid"
-                            color={cellValue ? "secondary" : "danger"}
-                            classNames={{
-                                content: "font-bold",
-                            }}
-                        >
-                            {cellValue ? "VIEW IMAGE" : "NONE"}
-                        </Chip>
-                    </Link>
+                    <div className="flex flex-col">
+                        <p className="text-bold text-small capitalize">{cellValue}</p>
+                    </div>
                 );
-            case "linkedin":
+            case "type":
                 return (
-                    <Link
-                        href={cellValue}
+                    <Chip
+                        className="light uppercase text-white"
+                        size="sm"
+                        variant="solid"
+                        color={chipColors[cellValue]}
+                        classNames={{
+                            content: "font-bold",
+                        }}
                     >
-                        <Chip
-                            className="light capitalize"
-                            size="sm"
-                            variant="solid"
-                            color={cellValue ? "secondary" : "danger"}
-                            classNames={{
-                                content: "font-bold",
-                            }}
-                        >
-                            {cellValue ? "OPEN LINK" : "NONE"}
-                        </Chip>
-                    </Link>
+                        {cellValue}
+                    </Chip>
                 );
             case "actions":
                 return (
@@ -309,14 +315,14 @@ const Faculty = () => {
                     //         <Trash2 />
                     //     </Button>
                     // </div>
-                    <Options id={id} user={user} />
+                    <Options id={id} project={project} />
                 );
             default:
                 return cellValue;
         }
     }, []);
 
-    const Options = ({ id, user }) => {
+    const Options = ({ id, project }) => {
         const [isLoading, setIsLoading] = useState(false)
         return (
             <div className="relative flex justify-center items-center gap-2">
@@ -326,14 +332,16 @@ const Faculty = () => {
                     variant="flat"
                     onPress={() => {
                         onOpen()
-                        setName(user.name)
-                        setDepartment(user.department)
-                        setDepartmentCode(user.departmentCode)
-                        setLinkedin(user.linkedin)
-                        setIsHod(user.isHod)
-                        setPost(user.post)
+                        setFacultyName(project.facultyName)
+                        setDepartment(project.department)
+                        setTitle(project.title)
+                        setProjectType(project.type)
+                        setDuration(project.duration)
+                        setOrganisation(project.organisation)
+                        setFunding(project.funding)
                         setIsEditing(true)
                         setId(id)
+                        console.log("isEditing in Project", isEditing)
                         // console.log(user)
                     }}
                 >
@@ -391,7 +399,7 @@ const Faculty = () => {
                     <Input
                         isClearable
                         className="w-full sm:max-w-[44%]"
-                        placeholder="Search by name..."
+                        placeholder="Search by faculty name..."
                         startContent={<SearchIcon />}
                         value={filterValue}
                         onClear={() => onClear()}
@@ -446,12 +454,13 @@ const Faculty = () => {
                             onPress={() => {
                                 onOpen()
                                 setIsEditing(false)
-                                setName("")
+                                setFacultyName("")
                                 setDepartment("")
-                                setDepartmentCode("")
-                                setIsHod(null)
-                                setPost("")
-                                setLinkedin("")
+                                setTitle("")
+                                setProjectType("")
+                                setDuration("")
+                                setOrganisation("")
+                                setFunding("")
                             }}
                         >
                             Add New
@@ -520,7 +529,7 @@ const Faculty = () => {
             <Table
                 className="min-h-screen"
                 isHeaderSticky
-                aria-label="Faculty table with pagination and sorting"
+                aria-label="Project table with pagination and sorting"
                 bottomContent={bottomContent}
                 bottomContentPlacement="inside"
                 classNames={{
@@ -546,7 +555,7 @@ const Faculty = () => {
                     )}
                 </TableHeader>
                 <TableBody
-                    emptyContent={"No faculties found"}
+                    emptyContent={"No projects found"}
                     items={sortedItems}
                     isLoading={isFetching}
                     loadingContent={"Loading..."}
@@ -558,15 +567,16 @@ const Faculty = () => {
                     )}
                 </TableBody>
             </Table>
-            <FacultyModal
+            <ProjectModal
                 isOpen={isOpen}
                 onOpenChange={onOpenChange}
-                defaultName={name}
+                defaultFacultyName={facultyName}
                 defaultDepartment={department}
-                defaultDepartmentCode={departmentCode}
-                defaultPost={post}
-                defaultIsHod={isHod}
-                defaultLinkedIn={linkedin}
+                defaultProjectType={projectType}
+                defaultTitle={title}
+                defaultDuration={duration}
+                defaultFunding={funding}
+                defaultOrganisation={organisation}
                 defaultIsEditing={isEditing}
                 id={id}
             />
@@ -574,4 +584,4 @@ const Faculty = () => {
     );
 }
 
-export default Faculty
+export default Project

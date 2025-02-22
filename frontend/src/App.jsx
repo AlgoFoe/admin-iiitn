@@ -1,35 +1,29 @@
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
-// import { Navbar } from './components/Navbar'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import Faculty from './pages/Faculty'
-import '@/css/App.css'
-import Home from './pages/Home'
-import { useState } from 'react'
+import Login from './pages/Login'
 import { Toaster } from 'react-hot-toast'
 import Project from './pages/Project'
-
-function ProtectedLayout({ isAuthorized }) {
-  return isAuthorized ? <Outlet /> : <Navigate to="/" />;
-}
+import CustomNavbar from './components/Navbar'
+import Signup from './pages/SignUp'
+import useAuthContext from './hooks/useAuthContext'
+import '@/css/App.css'
 
 function App() {
 
-  const [isAuthorized, setIsAuthorized] = useState(false)
+  const { authUser } = useAuthContext()
 
   return (
     <div
       className='w-screen'
     >
-      <Toaster/>
+      <CustomNavbar />
+      <Toaster />
       <Routes>
-        <Route path="/" element={<Home setIsAuthorized={setIsAuthorized} />} />
-        
-        {/* Protected Routes Grouped Under a Single Layout */}
-        {/* <Route element={<ProtectedLayout isAuthorized={isAuthorized} />}> */}
-
-          <Route path="/faculty" element={<Faculty />} />
-          <Route path="/project" element={<Project />} />
-
-        {/* </Route> */}
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/login" element={authUser ? <Navigate to="/faculty" /> : <Login />} />
+        <Route path="/signup" element={authUser ? <Navigate to="/faculty" /> : <Signup />} />
+        <Route path="/faculty" element={authUser ? <Faculty /> : <Navigate to="/login" />} />
+        <Route path="/project" element={authUser ? <Project /> : <Navigate to="/login" />} />
       </Routes>
     </div>
   )

@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const facultyRoutes = require("./routes/faculty.routes");
 const projectRoutes = require("./routes/project.routes");
+const authRoutes = require("./routes/auth.routes");
 const ConnectDB = require("./config/db");
 
 dotenv.config();
@@ -29,6 +30,7 @@ app.use((req, res, next) => {
 // Routes
 app.use("/", facultyRoutes);
 app.use("/", projectRoutes);
+app.use("/", authRoutes);
 
 // Start the server
 app.listen(PORT, async () => {

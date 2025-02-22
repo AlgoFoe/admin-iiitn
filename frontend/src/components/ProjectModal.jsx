@@ -1,22 +1,23 @@
 import { Button } from "@heroui/button";
 import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
 import { Form } from "@heroui/form";
-import { Input } from "@heroui/input";
+import { Input, Textarea } from "@heroui/input";
 import { useEffect, useState } from "react";
 import { RadioGroup, Radio } from "@heroui/radio";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
-export default function FacultyModal({
+export default function ProjectModal({
     isOpen,
     onOpenChange,
-    defaultName,
+    defaultFacultyName,
     defaultDepartment,
-    defaultDepartmentCode,
-    defaultIsHod,
-    defaultLinkedIn,
-    defaultPost,
+    defaultProjectType,
+    defaultTitle,
+    defaultDuration,
+    defaultFunding,
+    defaultOrganisation,
     defaultIsEditing,
     id
 
@@ -37,64 +38,54 @@ export default function FacultyModal({
         },
     ]
 
-    const departmentName = {
-        "cse": "Computer Science & Engineering",
-        "ece": "Electronics & Communication Engineering",
-        "bs": "Basic Sciences"
-    }
-
-    const isHodOptions = [
+    const projectTypeOptions = [
         {
-            value: true,
-            label: "Yes",
+            value: "ongoing",
+            label: "Ongoing",
         },
         {
-            value: false,
-            label: "No"
+            value: "completed",
+            label: "Completed"
+        },
+        {
+            value: "consultancy",
+            label: "Consultancy"
         }
     ]
 
     // const [submitted, setSubmitted] = useState(null);
-    const [name, setName] = useState("");
+    const [facultyName, setFacultyName] = useState("");
     const [department, setDepartment] = useState("");
-    const [departmentCode, setDepartmentCode] = useState("");
-    const [isHod, setIsHod] = useState();
-    const [linkedin, setLinkedin] = useState("");
-    const [post, setPost] = useState("");
+    const [title, setTitle] = useState("");
+    const [projectType, setProjectType] = useState("");
+    const [duration, setDuration] = useState("");
+    const [organisation, setOrganisation] = useState("");
+    const [funding, setFunding] = useState("")
     const [isEditing, setIsEditing] = useState(false);
-    const [image, setImage] = useState(null)
 
     const [isLoading, setIsLoading] = useState(false)
 
     const navigate = useNavigate();
 
     useEffect(() => {
-        setName(defaultName)
+        setFacultyName(defaultFacultyName)
         setDepartment(defaultDepartment)
-        setDepartmentCode(defaultDepartmentCode)
-        setPost(defaultPost)
-        setIsHod(defaultIsHod)
-        setLinkedin(defaultLinkedIn)
+        setTitle(defaultTitle)
+        setProjectType(defaultProjectType)
+        setDuration(defaultDuration)
+        setOrganisation(defaultOrganisation)
+        setFunding(defaultFunding)
         setIsEditing(defaultIsEditing)
     }, [
-        defaultName,
+        defaultFacultyName,
         defaultDepartment,
-        defaultDepartmentCode,
-        defaultIsHod,
-        defaultLinkedIn,
-        defaultPost,
+        defaultProjectType,
+        defaultTitle,
+        defaultDuration,
+        defaultFunding,
+        defaultOrganisation,
         defaultIsEditing
     ])
-
-    // useEffect(() => {
-    //     console.log("name", name)
-    //     console.log("department", department)
-    //     console.log("departmentCode", departmentCode)
-    //     console.log("post", post)
-    //     console.log("isHod", isHod)
-    //     console.log("isEditing", isEditing)
-    // }, [name, department])
-
 
     const onSubmit = (e) => {
         e.preventDefault();
@@ -110,10 +101,10 @@ export default function FacultyModal({
         // console.log("linkedin",linkedin)
         // console.log("post",post)
         // console.log("image",image)
-        addFaculty()
+        addProject()
     };
 
-    const addFaculty = async () => {
+    const addProject = async () => {
         setIsLoading(true)
         const loadingToastId = toast.loading("Proccessing...")
         try {
@@ -132,33 +123,31 @@ export default function FacultyModal({
             // formData.append("imageUrl", image.name); // Add the image file
 
             if (isEditing) {
-                const response = await axios.put(`${import.meta.env.VITE_SERVER_URL}/faculty`, {
+                const response = await axios.put(`${import.meta.env.VITE_SERVER_URL}/project`, {
                     // data: {
-                    name: name,
+                    facultyName: facultyName,
+                    title: title,
+                    funding: funding,
+                    duration: duration,
+                    organisation: organisation,
                     department: department,
-                    departmentCode: departmentCode,
-                    post: post,
-                    linkedin: linkedin,
-                    isHod: isHod,
-                    imageUrl: "asdfv",
+                    type: projectType,
                     id: id
-                    // image: image,
 
                     // headers: {
                     //     "Content-Type": "multipart/form-data",
                     // },
                 });
             } else {
-                const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/faculty`, {
+                const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/project`, {
                     // data: {
-                    name: name,
+                    facultyName: facultyName,
+                    title: title,
+                    funding: funding,
+                    duration: duration,
+                    organisation: organisation,
                     department: department,
-                    departmentCode: departmentCode,
-                    post: post,
-                    linkedin: linkedin,
-                    isHod: isHod,
-                    imageUrl: "asdfv",
-                    // image: image,
+                    type: projectType
 
                     // headers: {
                     //     "Content-Type": "multipart/form-data",
@@ -214,21 +203,38 @@ export default function FacultyModal({
                 {(onClose) => (
                     <>
                         <ModalHeader>
-                            Add New Faculty
+                            Add New Project
                         </ModalHeader>
                         <ModalBody>
                             <Form className="flex flex-col gap-2" onSubmit={onSubmit}>
-                                <Input
+                                <Textarea
+
                                     isRequired
                                     errorMessage="Field cannot be empty"
-                                    label="Name"
+                                    label="Faculty Name(s)"
                                     labelPlacement="outside"
-                                    name="name"
-                                    placeholder="Enter name"
+                                    name="facultyName"
+                                    placeholder="Enter faculty name(s)"
                                     type="text"
-                                    value={name}
+                                    minRows={2}
+                                    maxRows={4}
+                                    value={facultyName}
                                     // defaultValue="name"
-                                    onValueChange={setName}
+                                    onValueChange={setFacultyName}
+                                />
+                                <Textarea
+                                    isRequired
+                                    errorMessage="Field cannot be empty"
+                                    label="Project Title"
+                                    labelPlacement="outside"
+                                    name="title"
+                                    placeholder="Enter project title"
+                                    type="text"
+                                    minRows={2}
+                                    maxRows={4}
+                                    value={title}
+                                    // defaultValue="name"
+                                    onValueChange={setTitle}
                                 />
                                 <RadioGroup
                                     isRequired
@@ -236,11 +242,10 @@ export default function FacultyModal({
                                     label="Department"
                                     labelPlacement="outside"
                                     name="department"
-                                    value={departmentCode}
+                                    value={department}
                                     // defaultValue={[departmentCode]}
                                     onValueChange={(value) => {
-                                        setDepartment(departmentName[value])
-                                        setDepartmentCode(value)
+                                        setDepartment(value)
                                     }}
                                 >
                                     {
@@ -254,15 +259,15 @@ export default function FacultyModal({
                                 <RadioGroup
                                     isRequired
                                     errorMessage="Field cannot be empty"
-                                    label="Is Head of Department"
+                                    label="Project Type"
                                     labelPlacement="outside"
-                                    name="isHod"
-                                    value={isHod}
+                                    name="projectType"
+                                    value={projectType}
                                     // defaultValue={isHod}
-                                    onValueChange={setIsHod}
+                                    onValueChange={setProjectType}
                                 >
                                     {
-                                        isHodOptions.map((option) => (
+                                        projectTypeOptions.map((option) => (
                                             <Radio value={option.value} key={option.value}>
                                                 {option.label}
                                             </Radio>
@@ -272,37 +277,34 @@ export default function FacultyModal({
                                 <Input
                                     isRequired
                                     errorMessage="Field cannot be empty"
-                                    label="Post"
+                                    label="Project Funding"
                                     labelPlacement="outside"
-                                    name="post"
-                                    placeholder="Enter post"
+                                    name="funding"
+                                    placeholder="Enter project funding amount"
                                     type="text"
-                                    value={post}
-                                    onValueChange={setPost}
+                                    value={funding}
+                                    onValueChange={setFunding}
+                                />
+                                <Input
+                                    isRequired
+                                    errorMessage="Field cannot be empty"
+                                    label="Project Duration"
+                                    labelPlacement="outside"
+                                    name="duration"
+                                    placeholder="Enter project duration"
+                                    type="text"
+                                    value={duration}
+                                    onValueChange={setDuration}
                                 />
                                 <Input
                                     // errorMessage="Field cannot be empty"
-                                    label="LinkedIn"
+                                    label="Organisation"
                                     labelPlacement="outside"
-                                    name="linkedin"
-                                    placeholder="Enter LinkedIn Profile Link"
+                                    name="organisation"
+                                    placeholder="Enter organisation name"
                                     type="text"
-                                    value={linkedin}
-                                    onValueChange={setLinkedin}
-                                />
-                                <Input
-                                    isRequired={!isEditing}
-                                    errorMessage="Faculty image required"
-                                    label="Profile Image"
-                                    labelPlacement="outside"
-                                    name="image"
-                                    placeholder="Upload profile image"
-                                    type="file"
-                                    isDisabled={isEditing}
-                                    onChange={(e) => {
-                                        setImage(e.target.files[0])
-                                        // console.log(e.target.files)
-                                    }}
+                                    value={organisation}
+                                    onValueChange={setOrganisation}
                                 />
                                 <Button
                                     className="my-2"
