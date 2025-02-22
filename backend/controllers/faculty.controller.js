@@ -71,7 +71,7 @@ const updateFaculty = async (req, res) => {
             id,
             {
                 name,
-                imageUrl,
+                // imageUrl,
                 post,
                 linkedin,
                 department,

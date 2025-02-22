@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const facultyRoutes = require("./routes/faculty.routes");
+const projectRoutes = require("./routes/project.routes");
 const ConnectDB = require("./config/db");
 
 dotenv.config();
@@ -27,6 +28,7 @@ app.use((req, res, next) => {
 
 // Routes
 app.use("/", facultyRoutes);
+app.use("/", projectRoutes);
 
 // Start the server
 app.listen(PORT, async () => {
