@@ -5,6 +5,7 @@ import '@/css/App.css'
 import Home from './pages/Home'
 import { useState } from 'react'
 import { Toaster } from 'react-hot-toast'
+import Project from './pages/Project'
 
 function ProtectedLayout({ isAuthorized }) {
   return isAuthorized ? <Outlet /> : <Navigate to="/" />;
@@ -26,6 +27,7 @@ function App() {
         {/* <Route element={<ProtectedLayout isAuthorized={isAuthorized} />}> */}
 
           <Route path="/faculty" element={<Faculty />} />
+          <Route path="/project" element={<Project />} />
 
         {/* </Route> */}
       </Routes>

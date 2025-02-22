@@ -2,7 +2,7 @@ import { Button } from "@heroui/button";
 import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
 import { Form } from "@heroui/form";
 import { Input } from "@heroui/input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RadioGroup, Radio } from "@heroui/radio";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -17,7 +17,8 @@ export default function FacultyModal({
     defaultIsHod,
     defaultLinkedIn,
     defaultPost,
-    isEditing
+    defaultIsEditing,
+    id
 
 }) {
 
@@ -54,17 +55,46 @@ export default function FacultyModal({
     ]
 
     // const [submitted, setSubmitted] = useState(null);
-    const [name, setName] = useState(defaultName);
-    const [department, setDepartment] = useState(defaultDepartment);
-    const [departmentCode, setDepartmentCode] = useState(defaultDepartmentCode);
-    const [isHod, setIsHod] = useState(defaultIsHod);
-    const [linkedin, setLinkedin] = useState(defaultLinkedIn);
-    const [post, setPost] = useState(defaultPost);
+    const [name, setName] = useState("");
+    const [department, setDepartment] = useState("");
+    const [departmentCode, setDepartmentCode] = useState("");
+    const [isHod, setIsHod] = useState();
+    const [linkedin, setLinkedin] = useState("");
+    const [post, setPost] = useState("");
+    const [isEditing, setIsEditing] = useState(false);
     const [image, setImage] = useState(null)
 
     const [isLoading, setIsLoading] = useState(false)
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        setName(defaultName)
+        setDepartment(defaultDepartment)
+        setDepartmentCode(defaultDepartmentCode)
+        setPost(defaultPost)
+        setIsHod(defaultIsHod)
+        setLinkedin(defaultLinkedIn)
+        setIsEditing(defaultIsEditing)
+    }, [
+        defaultName,
+        defaultDepartment,
+        defaultDepartmentCode,
+        defaultIsHod,
+        defaultLinkedIn,
+        defaultPost,
+        defaultIsEditing
+    ])
+
+    // useEffect(() => {
+    //     console.log("name", name)
+    //     console.log("department", department)
+    //     console.log("departmentCode", departmentCode)
+    //     console.log("post", post)
+    //     console.log("isHod", isHod)
+    //     console.log("isEditing", isEditing)
+    // }, [name, department])
+
 
     const onSubmit = (e) => {
         e.preventDefault();
@@ -101,21 +131,40 @@ export default function FacultyModal({
             // formData.append("isHod", isHod);
             // formData.append("imageUrl", image.name); // Add the image file
 
-            const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/faculty`, {
-                // data: {
-                name: name,
-                department: department,
-                departmentCode: departmentCode,
-                post: post,
-                linkedin: linkedin,
-                isHod: isHod,
-                imageUrl: "asdfv",
-                // image: image,
+            if (isEditing) {
+                const response = await axios.put(`${import.meta.env.VITE_SERVER_URL}/faculty`, {
+                    // data: {
+                    name: name,
+                    department: department,
+                    departmentCode: departmentCode,
+                    post: post,
+                    linkedin: linkedin,
+                    isHod: isHod,
+                    imageUrl: "asdfv",
+                    id: id
+                    // image: image,
 
-                // headers: {
-                //     "Content-Type": "multipart/form-data",
-                // },
-            });
+                    // headers: {
+                    //     "Content-Type": "multipart/form-data",
+                    // },
+                });
+            } else {
+                const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/faculty`, {
+                    // data: {
+                    name: name,
+                    department: department,
+                    departmentCode: departmentCode,
+                    post: post,
+                    linkedin: linkedin,
+                    isHod: isHod,
+                    imageUrl: "asdfv",
+                    // image: image,
+
+                    // headers: {
+                    //     "Content-Type": "multipart/form-data",
+                    // },
+                });
+            }
 
             // console.log(response)
 
@@ -149,6 +198,10 @@ export default function FacultyModal({
         }
     }
 
+    // console.log("name",name)
+    // console.log("department",department)
+    // console.log("departmentCode",departmentCode)
+
     return (
         <Modal
             className=""
@@ -175,6 +228,7 @@ export default function FacultyModal({
                                     placeholder="Enter name"
                                     type="text"
                                     value={name}
+                                    // defaultValue="name"
                                     onValueChange={setName}
                                 />
                                 <RadioGroup
@@ -183,8 +237,8 @@ export default function FacultyModal({
                                     label="Department"
                                     labelPlacement="outside"
                                     name="department"
-                                    // value={department}
-                                    defaultValue={departmentCode}
+                                    value={departmentCode}
+                                    // defaultValue={[departmentCode]}
                                     onValueChange={(value) => {
                                         setDepartment(departmentName[value])
                                         setDepartmentCode(value)
@@ -204,7 +258,8 @@ export default function FacultyModal({
                                     label="Is Head of Department"
                                     labelPlacement="outside"
                                     name="isHod"
-                                    defaultValue={isHod}
+                                    value={isHod}
+                                    // defaultValue={isHod}
                                     onValueChange={setIsHod}
                                 >
                                     {
@@ -244,6 +299,7 @@ export default function FacultyModal({
                                     name="image"
                                     placeholder="Upload profile image"
                                     type="file"
+                                    isDisabled={isEditing}
                                     onChange={(e) => {
                                         setImage(e.target.files[0])
                                         // console.log(e.target.files)
@@ -252,7 +308,7 @@ export default function FacultyModal({
                                 <Button
                                     className="my-2"
                                     type="submit"
-                                    variant="flat"
+                                    variant="solid"
                                     color="success"
                                     isLoading={isLoading}
                                 >

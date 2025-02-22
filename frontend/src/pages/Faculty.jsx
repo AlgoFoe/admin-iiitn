@@ -61,6 +61,7 @@ const Faculty = () => {
     const [linkedin, setLinkedin] = useState("");
     const [post, setPost] = useState("");
     const [isEditing, setIsEditing] = useState(false)
+    const [id,setId] = useState()
 
     const [filterValue, setFilterValue] = useState("");
     const [selectedKeys, setSelectedKeys] = useState(new Set([]));
@@ -160,9 +161,10 @@ const Faculty = () => {
         });
     }, [sortDescriptor, items]);
 
-    const deleteEntry = async (id) => {
+    const deleteEntry = async (id, setIsLoading) => {
         // isLoading = true
         // setLoadingIds((prev) => new Set([...prev,id]));
+        setIsLoading(true)
 
         const loadingToastId = toast.loading("Processing...")
 
@@ -203,9 +205,9 @@ const Faculty = () => {
             // console.log("Done")
             // isLoading = false
             // setIsDeleting(false)
-            // setLoading(false);
-
+            setIsLoading(false);
             navigate(0)
+
         }
     }
 
@@ -274,41 +276,79 @@ const Faculty = () => {
                 );
             case "actions":
                 return (
-                    <div className="relative flex justify-center items-center gap-2">
-                        <Button
-                            size="sm"
-                            color="warning"
-                            variant="flat"
-                            onPress={() => {
-                                onOpen()
-                                setName(user.name)
-                                setDepartment(user.department)
-                                setDepartmentCode(user.departmentCode)
-                                setLinkedin(user.linkedin)
-                                setIsHod(user.isHod)
-                                setPost(user.post)
-                                setIsEditing(true)
-                                console.log(user)
-                            }}
-                        >
-                            <UserRoundPen />
-                        </Button>
-                        <Button
-                            size="sm"
-                            color="danger"
-                            variant="flat"
-                            onPress={() => deleteEntry(id)}
-                            // isDisabled={loadingIds.has(id)}
+                    // <div className="relative flex justify-center items-center gap-2">
+                    //     <Button
+                    //         size="sm"
+                    //         color="warning"
+                    //         variant="flat"
+                    //         onPress={() => {
+                    //             onOpen()
+                    //             // setName(user.name)
+                    //             // setDepartment(user.department)
+                    //             // setDepartmentCode(user.departmentCode)
+                    //             // setLinkedin(user.linkedin)
+                    //             // setIsHod(user.isHod)
+                    //             // setPost(user.post)
+                    //             // setIsEditing(true)
+                    //             console.log(user)
+                    //         }}
+                    //     >
+                    //         <UserRoundPen />
+                    //     </Button>
+                    //     <Button
+                    //         size="sm"
+                    //         color="danger"
+                    //         variant="flat"
+                    //         onPress={() => deleteEntry(id)}
+                    //     // isDisabled={loadingIds.has(id)}
 
-                        >
-                            <Trash2 />
-                        </Button>
-                    </div>
+                    //     >
+                    //         <Trash2 />
+                    //     </Button>
+                    // </div>
+                    <Options id={id} user={user}/>
                 );
             default:
                 return cellValue;
         }
     }, []);
+
+    const Options = ({ id,user }) => {
+        const [isLoading, setIsLoading] = useState(false)
+        return (
+            <div className="relative flex justify-center items-center gap-2">
+                <Button
+                    size="sm"
+                    color="warning"
+                    variant="flat"
+                    onPress={() => {
+                        onOpen()
+                        setName(user.name)
+                        setDepartment(user.department)
+                        setDepartmentCode(user.departmentCode)
+                        setLinkedin(user.linkedin)
+                        setIsHod(user.isHod)
+                        setPost(user.post)
+                        setIsEditing(true)
+                        setId(id)
+                        // console.log(user)
+                    }}
+                >
+                    <UserRoundPen />
+                </Button>
+                <Button
+                    size="sm"
+                    color="danger"
+                    variant="flat"
+                    onPress={() => deleteEntry(id, setIsLoading)}
+                    // isDisabled={loadingIds.has(id)}
+                    isLoading={isLoading}
+                >
+                    {!isLoading && <Trash2 />}
+                </Button>
+            </div>
+        )
+    }
 
     const onNextPage = useCallback(() => {
         if (page < pages) {
@@ -403,6 +443,12 @@ const Faculty = () => {
                             onPress={() => {
                                 onOpen()
                                 setIsEditing(false)
+                                setName("")
+                                setDepartment("")
+                                setDepartmentCode("")
+                                setIsHod(null)
+                                setPost("")
+                                setLinkedin("")
                             }}
                         >
                             Add New
@@ -512,6 +558,8 @@ const Faculty = () => {
                 defaultPost={post}
                 defaultIsHod={isHod}
                 defaultLinkedIn={linkedin}
+                defaultIsEditing={isEditing}
+                id={id}
             />
         </div>
     );
