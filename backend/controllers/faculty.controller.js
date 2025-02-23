@@ -2,7 +2,8 @@ const Faculty = require("../models/faculty");
 
 const addFaculty = async (req, res) => {
     try {
-        const { name, post, linkedin, imageUrl, department, departmentCode, isHod } = req.body;
+        const { name, post, linkedin, department, departmentCode, isHod, imageUrl } = req.body;
+        // console.log(name, post, linkedin, department, departmentCode, imageUrl)
 
         const faculty = await Faculty.create({
             name,
@@ -11,19 +12,16 @@ const addFaculty = async (req, res) => {
             linkedin,
             department,
             departmentCode,
-            isHod
+            isHod,
         });
 
-        if (faculty) {
-            res.status(200).json({ msg: "Faculty added successfully", data: faculty });
-        } else {
-            throw new Error("Error adding new Faculty");
-        }
+        res.status(200).json({ msg: "Faculty added successfully", data: faculty });
     } catch (err) {
-        console.log("Error in addFaculty controller : ", err.message);
+        console.error("Error in addFaculty controller:", err);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
 
 const getFaculty = async (req, res) => {
     try {
@@ -61,39 +59,25 @@ const getFaculty = async (req, res) => {
 
 const updateFaculty = async (req, res) => {
     try {
-        const { name, post, linkedin, imageUrl, department, departmentCode, id, isHod } = req.body;
+        const { name, post, linkedin, department, departmentCode, id, isHod, imageUrl } = req.body;
+        let updatedFields = { name, post, linkedin, department, departmentCode, isHod, imageUrl };
 
         if (!id) {
-            throw new Error("id of faculty required");
+            throw new Error("Faculty ID is required");
         }
 
-        const faculty = await Faculty.findByIdAndUpdate(
-            id,
-            {
-                name,
-                // imageUrl,
-                post,
-                linkedin,
-                department,
-                departmentCode,
-                isHod
-            },
-            {
-                new: true,
-                runValidators: true,
-            }
-        );
+        const faculty = await Faculty.findByIdAndUpdate(id, updatedFields, { new: true, runValidators: true });
 
         if (faculty) {
             res.status(200).json({ msg: "Faculty updated successfully", data: faculty });
         } else {
-            res.status(200).json({ msg: `Faculty with id ${id} does not exist` })
+            res.status(404).json({ msg: `Faculty with id ${id} does not exist` });
         }
     } catch (err) {
         console.log("Error in updateFaculty controller : ", err.message);
         res.status(500).json({ error: "Internal Server Error" });
     }
-}
+};
 
 const deleteFaculty = async (req, res) => {
     try {
